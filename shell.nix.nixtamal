@@ -1,0 +1,125 @@
+let
+  inputs = import ./nix/tamal { };
+  pkgs = import inputs.nixpkgs { };
+  nixtamal = (import /home/brittonr/git/nixtamal/release.nix).default;
+in
+pkgs.mkShell {
+  buildInputs = [
+    nixtamal
+  ] ++ (with pkgs; [
+    # Rust toolchain (using rustup for RedoxOS custom targets)
+    rustup
+    rust-analyzer
+
+    # Build tools & compilers
+    gcc
+    clang
+    llvm
+    nasm
+    gnumake
+    cmake
+    ninja
+    meson
+    scons
+    automake
+    autoconf
+    libtool
+    bison
+    flex
+    gettext
+    m4
+    pkg-config
+
+    # Version control
+    git
+    git-lfs
+    rsync
+
+    # Cargo tools
+    just
+    rust-cbindgen
+
+    # QEMU for testing
+    qemu
+
+    # Libraries (development)
+    fuse
+    fuse3
+    expat
+    gmp
+    libpng
+    libjpeg
+    SDL2
+    SDL2_ttf
+    fontconfig
+    freetype
+    zlib
+    openssl
+    protobuf
+
+    # Scripting & documentation
+    python3
+    python3Packages.mako
+    perl
+    lua
+    doxygen
+    help2man
+    texinfo
+
+    # Utilities
+    curl
+    wget
+    cacert
+    zip
+    unzip
+    patch
+    patchelf
+    file
+    gperf
+    ant
+    xdg-utils
+    gdb
+    cdrkit  # genisoimage
+    syslinux
+    zstd
+    lzip
+    unixtools.xxd
+    dos2unix
+  ]);
+
+  # Environment variables for build
+  PKG_CONFIG_PATH = pkgs.lib.makeSearchPath "lib/pkgconfig" [
+    pkgs.openssl.dev
+    pkgs.fuse
+    pkgs.fuse3
+    pkgs.expat
+    pkgs.zlib
+    pkgs.libpng
+    pkgs.libjpeg
+    pkgs.SDL2
+    pkgs.fontconfig
+    pkgs.freetype
+  ];
+
+  # For FUSE
+  FUSE_LIBRARY_PATH = "${pkgs.fuse}/lib";
+
+  # Ensure cargo/rustup work properly
+  RUSTUP_HOME = toString ./. + "/.rustup";
+  CARGO_HOME = toString ./. + "/.cargo";
+
+  shellHook = ''
+    export PATH="$CARGO_HOME/bin:$PATH"
+
+    # Initialize rustup if needed
+    if [ ! -d "$RUSTUP_HOME" ]; then
+      echo "Initializing rustup..."
+      rustup-init -y --no-modify-path --default-toolchain stable
+    fi
+
+    echo "RedoxOS build environment ready!"
+    echo "Next steps:"
+    echo "  1. Clone RedoxOS: git clone https://gitlab.redox-os.org/redox-os/redox.git redox-src"
+    echo "  2. cd redox-src && make all"
+  '';
+}

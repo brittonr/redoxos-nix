@@ -1,0 +1,114 @@
+RedoxOS build started at Wed Dec 31 04:50:00 PM EST 2025
+Setting up RedoxOS build environment...
+Detected Nix shell environment
+Found Rust toolchain at: /nix/store/1mxlbqimdfzqgiiznss6qb1yiari57if-rust-default-1.92.0
+Using Nix dynamic linker: /nix/store/vr15iyyykg9zai6fpgvhcgyw7gckl78w-gcc-wrapper-14.3.0/nix-support/dynamic-linker
+
+Environment configured:
+  CARGO_HOME: /home/brittonr/.cargo
+  RUST_TOOLCHAIN: /nix/store/1mxlbqimdfzqgiiznss6qb1yiari57if-rust-default-1.92.0
+  LD_LIBRARY_PATH: /nix/store/xm08aqdd7pxcdhm0ak6aqb1v7hw5q6ri-gcc-14.3.0-lib/lib:/nix/store/xx7cm72qy2c0643cm1ipngd87a...
+  NIX_LD: /nix/store/vr15iyyykg9zai6fpgvhcgyw7gckl78w-gcc-wrapper-14.3.0/nix-support/dynamic-linker
+  WRAPPER_DIR: /home/brittonr/git/redox/wrappers
+  REDOX_MAKE_JOBS: 24
+  PKG_CONFIG_PATH: /nix/store/zz0h3c3m63znky6mc1v6ml86qs26c4hc-sdl3-ttf-3.2.2/lib/pkgconfig:/nix/store/zynhq930yd2454hd...
+
+Verifying environment...
+Environment setup complete!
+Creating binary wrappers for RedoxOS build...
+Found Rust toolchain at: /nix/store/1mxlbqimdfzqgiiznss6qb1yiari57if-rust-default-1.92.0
+Found GCC toolchain at: /nix/store/67x7pknz0qa2j16x02idf0x98lpcspah-gcc-wrapper-14.3.0
+
+Creating Rust toolchain wrappers...
+Creating wrapper for rustc -> /nix/store/1mxlbqimdfzqgiiznss6qb1yiari57if-rust-default-1.92.0/bin/rustc
+Creating wrapper for cargo -> /nix/store/1mxlbqimdfzqgiiznss6qb1yiari57if-rust-default-1.92.0/bin/cargo
+Creating wrapper for rustdoc -> /nix/store/1mxlbqimdfzqgiiznss6qb1yiari57if-rust-default-1.92.0/bin/rustdoc
+Creating wrapper for rustfmt -> /nix/store/1mxlbqimdfzqgiiznss6qb1yiari57if-rust-default-1.92.0/bin/rustfmt
+Creating wrapper for clippy-driver -> /nix/store/1mxlbqimdfzqgiiznss6qb1yiari57if-rust-default-1.92.0/bin/clippy-driver
+Creating wrapper for cargo-clippy -> /nix/store/1mxlbqimdfzqgiiznss6qb1yiari57if-rust-default-1.92.0/bin/cargo-clippy
+Creating wrapper for rust-gdb -> /nix/store/1mxlbqimdfzqgiiznss6qb1yiari57if-rust-default-1.92.0/bin/rust-gdb
+Creating wrapper for rust-lldb -> /nix/store/1mxlbqimdfzqgiiznss6qb1yiari57if-rust-default-1.92.0/bin/rust-lldb
+Creating wrapper for cargo-fmt -> /nix/store/1mxlbqimdfzqgiiznss6qb1yiari57if-rust-default-1.92.0/bin/cargo-fmt
+
+Creating GCC toolchain wrappers...
+Creating wrapper for gcc -> /nix/store/67x7pknz0qa2j16x02idf0x98lpcspah-gcc-wrapper-14.3.0/bin/gcc
+Creating wrapper for g++ -> /nix/store/67x7pknz0qa2j16x02idf0x98lpcspah-gcc-wrapper-14.3.0/bin/g++
+Creating wrapper for cc -> /nix/store/67x7pknz0qa2j16x02idf0x98lpcspah-gcc-wrapper-14.3.0/bin/cc
+Creating wrapper for c++ -> /nix/store/67x7pknz0qa2j16x02idf0x98lpcspah-gcc-wrapper-14.3.0/bin/c++
+Creating wrapper for cpp -> /nix/store/67x7pknz0qa2j16x02idf0x98lpcspah-gcc-wrapper-14.3.0/bin/cpp
+Creating wrapper for as -> /nix/store/67x7pknz0qa2j16x02idf0x98lpcspah-gcc-wrapper-14.3.0/bin/as
+Creating wrapper for ld -> /nix/store/67x7pknz0qa2j16x02idf0x98lpcspah-gcc-wrapper-14.3.0/bin/ld
+Creating wrapper for ar -> /nix/store/67x7pknz0qa2j16x02idf0x98lpcspah-gcc-wrapper-14.3.0/bin/ar
+Creating wrapper for ranlib -> /nix/store/67x7pknz0qa2j16x02idf0x98lpcspah-gcc-wrapper-14.3.0/bin/ranlib
+Creating wrapper for strip -> /nix/store/67x7pknz0qa2j16x02idf0x98lpcspah-gcc-wrapper-14.3.0/bin/strip
+Creating wrapper for objcopy -> /nix/store/67x7pknz0qa2j16x02idf0x98lpcspah-gcc-wrapper-14.3.0/bin/objcopy
+Creating wrapper for objdump -> /nix/store/67x7pknz0qa2j16x02idf0x98lpcspah-gcc-wrapper-14.3.0/bin/objdump
+Creating wrapper for nm -> /nix/store/67x7pknz0qa2j16x02idf0x98lpcspah-gcc-wrapper-14.3.0/bin/nm
+Creating wrapper for readelf -> /nix/store/67x7pknz0qa2j16x02idf0x98lpcspah-gcc-wrapper-14.3.0/bin/readelf
+Creating wrapper for size -> /nix/store/67x7pknz0qa2j16x02idf0x98lpcspah-gcc-wrapper-14.3.0/bin/size
+
+Creating cross-compiler wrappers...
+
+Creating pkg-config wrapper with enhanced search paths...
+Creating environment wrapper for pkg-config -> /nix/store/05h9vfzhqf7l6w1xczixici2ldw9y788-pkg-config-wrapper-0.29.2/bin/pkg-config
+
+Creating NASM wrapper...
+Creating wrapper for nasm -> /nix/store/q18jfxnilx7yc8zm0in2gk10fm2g802w-nasm-2.16.03/bin/nasm
+
+Creating make wrapper...
+Creating wrapper for make -> /nix/store/3fmzbq9y4m9nk235il7scmvwn8j9zy3p-gnumake-4.4.1/bin/make
+
+Creating Python3 wrapper...
+Creating wrapper for python3 -> /nix/store/0hf87b33gmy8cv4dyycmvh45n69brr80-python3-3.13.7-env/bin/python3
+Creating wrapper for python -> /nix/store/0hf87b33gmy8cv4dyycmvh45n69brr80-python3-3.13.7-env/bin/python3
+
+Wrapper creation complete!
+
+Created wrappers in /home/brittonr/git/redox/wrappers:
+drwxr-xr-x 2 brittonr brittonr   4096 Dec 31 16:50 .
+drwxr-xr-x 9 brittonr brittonr   4096 Dec 31 16:50 ..
+-rwxr-xr-x 1 brittonr brittonr   5356 Dec 31 16:50 ar
+-rwxr-xr-x 1 brittonr brittonr   5356 Dec 31 16:50 as
+-rwxr-xr-x 1 brittonr brittonr   5358 Dec 31 16:50 c++
+-rwxr-xr-x 1 brittonr brittonr   5363 Dec 31 16:50 cargo
+-rwxr-xr-x 1 brittonr brittonr   5377 Dec 31 16:50 cargo-clippy
+-rwxr-xr-x 1 brittonr brittonr   5371 Dec 31 16:50 cargo-fmt
+-rwxr-xr-x 1 brittonr brittonr   5356 Dec 31 16:50 cc
+-rwxr-xr-x 1 brittonr brittonr   5379 Dec 31 16:50 clippy-driver
+-rwxr-xr-x 1 brittonr brittonr   5358 Dec 31 16:50 cpp
+-rwxr-xr-x 1 brittonr brittonr   5358 Dec 31 16:50 g++
+-rwxr-xr-x 1 brittonr brittonr   5358 Dec 31 16:50 gcc
+-rwxr-xr-x 1 brittonr brittonr   5356 Dec 31 16:50 ld
+-rwxr-xr-x 1 brittonr brittonr   5355 Dec 31 16:50 make
+-rwxr-xr-x 1 brittonr brittonr   5354 Dec 31 16:50 nasm
+-rwxr-xr-x 1 brittonr brittonr   5356 Dec 31 16:50 nm
+-rwxr-xr-x 1 brittonr brittonr   5366 Dec 31 16:50 objcopy
+-rwxr-xr-x 1 brittonr brittonr   5366 Dec 31 16:50 objdump
+-rwxr-xr-x 1 brittonr brittonr 115781 Dec 31 16:50 pkg-config
+-rwxr-xr-x 1 brittonr brittonr   5365 Dec 31 16:50 python
+-rwxr-xr-x 1 brittonr brittonr   5366 Dec 31 16:50 python3
+-rwxr-xr-x 1 brittonr brittonr   5364 Dec 31 16:50 ranlib
+-rwxr-xr-x 1 brittonr brittonr   5366 Dec 31 16:50 readelf
+-rwxr-xr-x 1 brittonr brittonr   5363 Dec 31 16:50 rustc
+-rwxr-xr-x 1 brittonr brittonr   5367 Dec 31 16:50 rustdoc
+-rwxr-xr-x 1 brittonr brittonr   5367 Dec 31 16:50 rustfmt
+-rwxr-xr-x 1 brittonr brittonr   5369 Dec 31 16:50 rust-gdb
+-rwxr-xr-x 1 brittonr brittonr   5371 Dec 31 16:50 rust-lldb
+-rwxr-xr-x 1 brittonr brittonr   5360 Dec 31 16:50 size
+-rwxr-xr-x 1 brittonr brittonr   5362 Dec 31 16:50 strip
+
+Library paths configured for wrappers:
+  /nix/store/xm08aqdd7pxcdhm0ak6aqb1v7hw5q6ri-gcc-14.3.0-lib/lib
+/nix/store/xx7cm72qy2c0643cm1ipngd87aqwkcdp-glibc-2.40-66/lib
+/nix/store/l7xwm1f6f3zj2x8jwdbi8gdyfbx07sh7-zlib-1.3.1/lib
+/nix/store/61i74yjkj9p1qphfl7018ja4sdwkipx0-openssl-3.6.0/lib
+/nix/store/74fyi5hxcacj7y2n6aln40rmrsfr93j8-fuse-2.9.9/lib
+/nix/store/z7a34j3xnp66rpddayyxrxwsahxccbip-gcc-14.3.0-lib/lib
+/nix/store/yqz6mmj4svf92ml68b77ad6czcxf6pv9-gcc-14.3.0-libgcc/lib
+/nix/store/xp989kyfg52803fmkzbz5py35jphcpgd-gcc-14.3.0-lib/lib
+/nix/store/xm08aqdd7pxcdhm0ak6aqb1v7hw5q6ri-gcc-14.3.0-lib/lib
+/nix/store/xlg2y1qbkc0c2y79z3hnkahh3ksjm3kk-gcc-15.2.0-lib/lib
+  ... (and more)
+rustc 1.92.0 (ded5c06cf 2025-12-08)
+cargo 1.92.0 (344c4567c 2025-10-21)
+make: *** No rule to make target 'prefix/bin/redoxfs'.  Stop.
