@@ -9,6 +9,18 @@ This is a RedoxOS build environment using Nix flakes. The project contains:
 - Various build scripts for relibc and cross-compilation toolchain setup
 - Integration with Nixtamal for input pinning
 
+## External Resources
+
+- **Official Package Repository**: https://static.redox-os.org/pkg/x86_64-unknown-redox/
+- **Porting Applications Guide**: https://doc.redox-os.org/book/porting-applications.html
+- **Porting Case Study**: https://doc.redox-os.org/book/porting-case-study.html
+- **Libraries and APIs**: https://doc.redox-os.org/book/libraries-apis.html
+- **Developer FAQ**: https://doc.redox-os.org/book/developer-faq.html
+- **Build System Reference**: https://doc.redox-os.org/book/build-system-reference.html
+- **Build Phases**: https://doc.redox-os.org/book/build-phases.html
+- **Troubleshooting**: https://doc.redox-os.org/book/troubleshooting.html
+- **Boot Process**: https://doc.redox-os.org/book/boot-process.html
+
 ## Architecture
 
 ### Directory Structure
@@ -178,3 +190,129 @@ qemu-system-x86_64 \
 - Interactive display resolution selection
 - USB tablet and keyboard support for better input handling
 - Close the window to quit
+
+## Ion Shell Reference
+
+Ion is the default shell for Redox OS. It has different syntax from POSIX shells (bash/sh).
+
+**Documentation**: https://doc.redox-os.org/ion-manual/
+
+### Key Differences from POSIX Shells
+
+- Variables use `let` not assignment: `let var = "value"` (NOT `var="value"`)
+- Arrays use `@` sigil: `@array` (strings use `$var`)
+- Control flow ends with `end` (NOT `fi`, `done`, `esac`)
+- Use `else if` (NOT `elif`)
+- No `then` keyword needed after `if`
+- Environment variables must be explicitly exported
+
+### Variables
+
+```ion
+# String variables
+let name = "hello"
+echo $name
+
+# Array variables
+let arr = [ one two three ]
+echo @arr
+
+# Type-checked variables
+let flag:bool = true
+let count:int = 42
+
+# Export for environment
+export PATH /bin:/usr/bin
+```
+
+### Control Flow
+
+```ion
+# If statement
+if test $val = "foo"
+    echo "found foo"
+else if test $val = "bar"
+    echo "found bar"
+else
+    echo "not found"
+end
+
+# For loop
+for item in @array
+    echo $item
+end
+
+# While loop
+let i = 0
+while test $i -lt 10
+    echo $i
+    let i += 1
+end
+```
+
+### Process Expansions
+
+```ion
+# String output (like bash $())
+let output = $(command args)
+
+# Array output (splits by whitespace)
+let items = [ @(ls) ]
+
+# Split by lines
+for line in @lines($(cat file))
+    echo $line
+end
+```
+
+### Conditionals and Tests
+
+```ion
+# File tests
+if exists -f /path/to/file
+    echo "file exists"
+end
+
+if exists -d /path/to/dir
+    echo "directory exists"
+end
+
+# String comparison
+if test $var = "value"
+if is $var "value"
+
+# Negation
+if not exists -f /path
+```
+
+### Pipelines and Redirection
+
+```ion
+# Standard pipe
+cmd1 | cmd2
+
+# Redirect stdout
+cmd > file.txt
+
+# Redirect stderr
+cmd ^> errors.txt
+
+# Redirect both
+cmd &> all.txt
+
+# Append
+cmd >> file.txt
+```
+
+### Common Builtins
+
+- `echo` - print text
+- `test` - evaluate expressions
+- `exists` - check if files/dirs/vars exist
+- `is` / `eq` - compare values
+- `not` - negate exit status
+- `matches` - regex matching
+- `let` - variable assignment
+- `drop` - delete variables
+- `cd` - change directory
+- `eval` - evaluate string as command
