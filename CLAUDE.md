@@ -9,6 +9,20 @@ This is a RedoxOS build environment using Nix flakes. The project contains:
 - Various build scripts for relibc and cross-compilation toolchain setup
 - Integration with Nixtamal for input pinning
 
+## Reference Documentation
+
+### SNIX Reference (snix-analysis.md)
+
+Reference `snix-analysis.md` when:
+- Discussing alternative Nix implementations or Nix internals
+- Considering content-addressed storage for the build system
+- Exploring modular/protocol-based architecture patterns
+- Comparing bytecode VMs vs AST interpreters
+- Designing pluggable build backends (OCI, gRPC, microVM)
+- Understanding how Nix evaluation, derivations, and stores work
+
+Key concepts covered: snix-eval bytecode VM, snix-castore content-addressed storage, snix-build protocol, EvalIO trait pattern, BuildService backends.
+
 ## External Resources
 
 - **Official Package Repository**: https://static.redox-os.org/pkg/x86_64-unknown-redox/
@@ -66,6 +80,10 @@ nix build .#diskImage
 # Run in QEMU (works with standard sandbox)
 nix run .#run-redox            # Headless mode with serial console
 nix run .#run-redox-graphical  # Graphical mode with display window
+
+# Run in Cloud Hypervisor (Rust-based VMM)
+nix run .#run-redox-cloud-hypervisor      # Headless mode with serial console
+nix run .#run-redox-cloud-hypervisor-net  # With TAP networking (requires setup)
 ```
 
 ### Development Shells
