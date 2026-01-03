@@ -84,6 +84,9 @@ nix run .#run-redox-graphical  # Graphical mode with display window
 # Run in Cloud Hypervisor (Rust-based VMM)
 nix run .#run-redox-cloud-hypervisor      # Headless mode with serial console
 nix run .#run-redox-cloud-hypervisor-net  # With TAP networking (requires setup)
+
+# Cloud Hypervisor networking setup (run once as root)
+sudo nix run .#setup-cloud-hypervisor-network  # Creates TAP interface with NAT
 ```
 
 ### Development Shells
