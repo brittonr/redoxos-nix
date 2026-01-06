@@ -77,13 +77,17 @@ nix build .#initfs
 # Complete disk image
 nix build .#diskImage
 
-# Run in QEMU (works with standard sandbox)
-nix run .#run-redox            # Headless mode with serial console
-nix run .#run-redox-graphical  # Graphical mode with display window
+# Run in Cloud Hypervisor (default - Rust-based VMM with lower overhead)
+nix run .#run-redox            # Headless mode with serial console (Cloud Hypervisor)
+nix run .#run-redox-graphical  # Graphical mode with QEMU GTK display
 
-# Run in Cloud Hypervisor (Rust-based VMM)
-nix run .#run-redox-cloud-hypervisor      # Headless mode with serial console
+# Cloud Hypervisor variants
+nix run .#run-redox-cloud-hypervisor      # Explicit Cloud Hypervisor (same as run-redox)
 nix run .#run-redox-cloud-hypervisor-net  # With TAP networking (requires setup)
+nix run .#run-redox-cloud-hypervisor-dev  # Development mode with API socket
+
+# QEMU variants (legacy)
+nix run .#run-redox-qemu       # QEMU headless mode
 
 # Cloud Hypervisor networking setup (run once as root)
 sudo nix run .#setup-cloud-hypervisor-network  # Creates TAP interface with NAT
@@ -165,7 +169,7 @@ When running with `nix run .#run-redox` or after building the disk image, you sh
 ### Expected Errors in Headless Mode
 
 The following errors are normal when running in headless/serial console mode:
-- **ps2d panic**: "No such device" - PS/2 driver fails because there's no keyboard/mouse in headless QEMU
+- **ps2d panic**: "No such device" - PS/2 driver fails because there's no keyboard/mouse in headless mode
 - **PCIe info warning**: Falls back to PCI 3.0 configuration space
 - These errors don't prevent the system from booting successfully
 
@@ -175,42 +179,60 @@ The following errors are normal when running in headless/serial console mode:
 # Build the complete disk image
 nix build .#diskImage
 
-# Run the built image in QEMU
-nix run .#run-redox            # Headless mode (auto-selects display after 3 seconds)
-nix run .#run-redox-graphical  # Graphical mode with interactive display selection
+# Run with Cloud Hypervisor (default - recommended)
+nix run .#run-redox            # Cloud Hypervisor headless with serial console
 
-# Or run manually with the built image
-# Headless mode:
+# Run with QEMU (for graphical mode or legacy compatibility)
+nix run .#run-redox-graphical  # QEMU graphical mode with GTK display
+nix run .#run-redox-qemu       # QEMU headless mode (legacy)
+
+# Or run manually with Cloud Hypervisor
+cloud-hypervisor \
+  --firmware /path/to/CLOUDHV.fd \
+  --disk path=result/redox.img \
+  --cpus boot=4 \
+  --memory size=2048M \
+  --serial tty \
+  --console off
+
+# Or run manually with QEMU
 qemu-system-x86_64 \
   -m 2048 \
   -enable-kvm \
   -bios /path/to/OVMF.fd \
   -drive file=result/redox.img,format=raw \
   -nographic
-
-# Graphical mode:
-qemu-system-x86_64 \
-  -m 2048 \
-  -enable-kvm \
-  -bios /path/to/OVMF.fd \
-  -drive file=result/redox.img,format=raw \
-  -vga std \
-  -display gtk
 ```
 
 ### Running Modes
 
-**Headless Mode** (`nix run .#run-redox`):
-- Uses serial console output
-- Automatically selects display resolution after 3 seconds
-- Good for CI/testing or when you don't need graphics
-- Exit with Ctrl+A then X
+**Cloud Hypervisor (Default)** (`nix run .#run-redox`):
+- Rust-based VMM with lower memory/CPU overhead
+- Uses virtio-blk storage with direct I/O
+- Serial console output
+- Exit with Ctrl+C
+- Environment variables: CH_CPUS, CH_MEMORY, CH_HUGEPAGES, CH_DIRECT_IO
 
-**Graphical Mode** (`nix run .#run-redox-graphical`):
+**Cloud Hypervisor with Networking** (`nix run .#run-redox-cloud-hypervisor-net`):
+- Requires TAP interface setup: `sudo nix run .#setup-cloud-hypervisor-network`
+- Uses virtio-net with multi-queue for throughput
+- Guest IP via DHCP (172.16.0.2/24)
+
+**Cloud Hypervisor Development Mode** (`nix run .#run-redox-cloud-hypervisor-dev`):
+- Enables API socket for runtime control
+- Supports pause/resume, snapshot/restore, memory hotplug
+- Use ch-remote or wrapper scripts: pause-redox, resume-redox, snapshot-redox
+
+**QEMU Graphical Mode** (`nix run .#run-redox-graphical`):
 - Opens a QEMU window with full graphics
 - Interactive display resolution selection
 - USB tablet and keyboard support for better input handling
 - Close the window to quit
+
+**QEMU Headless Mode** (`nix run .#run-redox-qemu`):
+- Legacy mode for compatibility
+- Uses serial console output
+- Exit with Ctrl+A then X
 
 ## Ion Shell Reference
 
