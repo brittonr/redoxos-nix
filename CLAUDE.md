@@ -41,7 +41,9 @@ Key concepts covered: snix-eval bytecode VM, snix-castore content-addressed stor
 - `/` - Root contains Nix flake configuration and build scripts
 - `redox-src/` - RedoxOS source tree (when cloned)
 - `nix/tamal/` - Nixtamal configuration for input management
-- `nix/pkgs/` - Additional Nix packages (if present)
+- `nix/pkgs/` - Package definitions (host, system, userspace, infrastructure)
+- `nix/redox-system/` - **NEW**: NixOS-style module system for declarative configuration
+- `nix/flake-modules/` - Flake-parts modules for build system integration
 
 ### Key Components (from flake.nix)
 
@@ -90,6 +92,12 @@ nix run .#run-redox-qemu       # QEMU headless mode
 
 # Cloud Hypervisor networking setup (run once as root)
 sudo nix run .#setup-cloud-hypervisor-network  # Creates TAP interface with NAT
+
+# Module system disk images (declarative, NixOS-style configuration)
+nix build .#redox-default     # Development profile (auto networking, CLI tools)
+nix build .#redox-minimal     # Minimal (ion + uutils only, no network)
+nix build .#redox-graphical   # Orbital desktop + audio
+nix build .#redox-cloud       # Cloud Hypervisor optimized (static IP, virtio-only)
 ```
 
 ### Development Shells
@@ -113,6 +121,50 @@ nix-shell -A native # Native shell
 ./build-simple.sh    # Simple build attempt
 ./build-with-wrappers.sh # Build with compiler wrappers
 ```
+
+### RedoxOS Module System (nix/redox-system/)
+
+A NixOS-style module system for declarative RedoxOS configuration.
+Inspired by NixOS modules, disko (disk config), and Lassulus/wrappers (extend pattern).
+
+```nix
+# Usage in a Nix expression:
+let
+  redoxSystemFactory = import ./nix/redox-system { inherit lib; };
+  mySystem = redoxSystemFactory.redoxSystem {
+    modules = [
+      ./nix/redox-system/modules/profiles/development.nix
+      {
+        redox.users.users.admin = { uid = 1001; gid = 1001; };
+        redox.networking.mode = "static";
+        redox.networking.interfaces.eth0 = {
+          address = "10.0.0.5"; gateway = "10.0.0.1";
+        };
+        redox.environment.systemPackages = [ pkgs.helix pkgs.ripgrep ];
+      }
+    ];
+    pkgs = flatRedoxPackages;  # All cross-compiled Redox packages
+    hostPkgs = nixpkgs;        # Build machine packages
+  };
+in mySystem.diskImage  # or .initfs, .toplevel, .config
+```
+
+**Module system structure:**
+- `nix/redox-system/default.nix` — `redoxSystem` entry point with `.extend` chaining
+- `nix/redox-system/eval.nix` — Module evaluator (lib.evalModules)
+- `nix/redox-system/modules/config/` — Option modules (boot, users, networking, etc.)
+- `nix/redox-system/modules/build/` — Build modules (initfs, disk-image, toplevel)
+- `nix/redox-system/modules/profiles/` — Pre-built configs (minimal, dev, graphical, cloud-hypervisor)
+
+**Key options:**
+- `redox.boot.{kernel, bootloader, initfs.*}` — Boot configuration
+- `redox.users.{users, groups}` — User/group management (Redox semicolon format)
+- `redox.networking.{enable, mode, dns, interfaces, remoteShell}` — Network config
+- `redox.hardware.{storage, network, graphics, audio}.drivers` — Driver selection
+- `redox.environment.{systemPackages, variables, shellAliases}` — System environment
+- `redox.services.{initScripts, startupScript}` — Init system config
+- `redox.graphics.enable` — Orbital desktop (auto-enables graphics drivers + USB)
+- `redox.generatedFiles` — All modules contribute config files here (disko pattern)
 
 ### Running Tests
 
