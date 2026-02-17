@@ -42,7 +42,7 @@ Key concepts covered: snix-eval bytecode VM, snix-castore content-addressed stor
 - `redox-src/` - RedoxOS source tree (when cloned)
 - `nix/tamal/` - Nixtamal configuration for input management
 - `nix/pkgs/` - Package definitions (host, system, userspace, infrastructure)
-- `nix/redox-system/` - **NEW**: NixOS-style module system for declarative configuration
+- `nix/redox-system/` - NixOS-style module system for declarative configuration (primary system builder)
 - `nix/flake-modules/` - Flake-parts modules for build system integration
 
 ### Key Components (from flake.nix)
@@ -74,14 +74,26 @@ nix build .#relibc
 nix build .#kernel
 nix build .#bootloader
 nix build .#base
-nix build .#initfs
 
-# Complete disk image
-nix build .#diskImage
+# Disk images (all built through the NixOS-style module system)
+nix build .#redox-default     # Development profile (auto networking, CLI tools)
+nix build .#redox-minimal     # Minimal (ion + uutils only, no network)
+nix build .#redox-graphical   # Orbital desktop + audio
+nix build .#redox-cloud       # Cloud Hypervisor optimized (static IP, virtio-only)
+nix build .#diskImage         # Alias for redox-default
 
 # Run in Cloud Hypervisor (default - Rust-based VMM with lower overhead)
 nix run .#run-redox            # Headless mode with serial console (Cloud Hypervisor)
 nix run .#run-redox-graphical  # Graphical mode with QEMU GTK display
+
+# Profile-specific runners
+nix run .#run-redox-default           # Development profile in Cloud Hypervisor
+nix run .#run-redox-default-qemu      # Development profile in QEMU headless
+nix run .#run-redox-minimal           # Minimal profile in Cloud Hypervisor
+nix run .#run-redox-cloud             # Cloud profile headless (no TAP)
+nix run .#run-redox-cloud-net         # Cloud profile with TAP networking
+nix run .#run-redox-graphical-desktop # Graphical profile with QEMU GTK display
+nix run .#run-redox-graphical-headless # Graphical profile headless (test drivers)
 
 # Cloud Hypervisor variants
 nix run .#run-redox-cloud-hypervisor-net  # With TAP networking (requires setup)
@@ -92,21 +104,6 @@ nix run .#run-redox-qemu       # QEMU headless mode
 
 # Cloud Hypervisor networking setup (run once as root)
 sudo nix run .#setup-cloud-hypervisor-network  # Creates TAP interface with NAT
-
-# Module system disk images (declarative, NixOS-style configuration)
-nix build .#redox-default     # Development profile (auto networking, CLI tools)
-nix build .#redox-minimal     # Minimal (ion + uutils only, no network)
-nix build .#redox-graphical   # Orbital desktop + audio
-nix build .#redox-cloud       # Cloud Hypervisor optimized (static IP, virtio-only)
-
-# Module system runners (run profiles directly in VMs)
-nix run .#run-redox-default           # Development profile in Cloud Hypervisor
-nix run .#run-redox-default-qemu      # Development profile in QEMU headless
-nix run .#run-redox-minimal           # Minimal profile in Cloud Hypervisor
-nix run .#run-redox-cloud             # Cloud profile headless (no TAP)
-nix run .#run-redox-cloud-net         # Cloud profile with TAP networking
-nix run .#run-redox-graphical-desktop # Graphical profile with QEMU GTK display
-nix run .#run-redox-graphical-headless # Graphical profile headless (test drivers)
 ```
 
 ### Development Shells
