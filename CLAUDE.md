@@ -82,7 +82,6 @@ nix run .#run-redox            # Headless mode with serial console (Cloud Hyperv
 nix run .#run-redox-graphical  # Graphical mode with QEMU GTK display
 
 # Cloud Hypervisor variants
-nix run .#run-redox-cloud-hypervisor      # Explicit Cloud Hypervisor (same as run-redox)
 nix run .#run-redox-cloud-hypervisor-net  # With TAP networking (requires setup)
 nix run .#run-redox-cloud-hypervisor-dev  # Development mode with API socket
 
