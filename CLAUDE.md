@@ -98,6 +98,15 @@ nix build .#redox-default     # Development profile (auto networking, CLI tools)
 nix build .#redox-minimal     # Minimal (ion + uutils only, no network)
 nix build .#redox-graphical   # Orbital desktop + audio
 nix build .#redox-cloud       # Cloud Hypervisor optimized (static IP, virtio-only)
+
+# Module system runners (run profiles directly in VMs)
+nix run .#run-redox-default           # Development profile in Cloud Hypervisor
+nix run .#run-redox-default-qemu      # Development profile in QEMU headless
+nix run .#run-redox-minimal           # Minimal profile in Cloud Hypervisor
+nix run .#run-redox-cloud             # Cloud profile headless (no TAP)
+nix run .#run-redox-cloud-net         # Cloud profile with TAP networking
+nix run .#run-redox-graphical-desktop # Graphical profile with QEMU GTK display
+nix run .#run-redox-graphical-headless # Graphical profile headless (test drivers)
 ```
 
 ### Development Shells
