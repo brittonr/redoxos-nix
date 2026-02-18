@@ -42,7 +42,9 @@ Key concepts covered: snix-eval bytecode VM, snix-castore content-addressed stor
 - `redox-src/` - RedoxOS source tree (when cloned)
 - `nix/tamal/` - Nixtamal configuration for input management
 - `nix/pkgs/` - Package definitions (host, system, userspace, infrastructure)
-- `nix/redox-system/` - NixOS-style module system for declarative configuration (primary system builder)
+- `nix/redox-system/` - Adios-based module system for declarative configuration (primary system builder)
+- `nix/vendor/adios/` - Vendored [adios](https://github.com/adisbladis/adios) module system by [@adisbladis](https://github.com/adisbladis)
+- `nix/vendor/korora/` - Vendored [Korora](https://github.com/adisbladis/adios) type system (standalone, no nixpkgs dependency)
 - `nix/flake-modules/` - Flake-parts modules for build system integration
 
 ### Key Components (from flake.nix)
@@ -75,7 +77,7 @@ nix build .#kernel
 nix build .#bootloader
 nix build .#base
 
-# Disk images (all built through the NixOS-style module system)
+# Disk images (all built through the adios module system)
 nix build .#redox-default     # Development profile (auto networking, CLI tools)
 nix build .#redox-minimal     # Minimal (ion + uutils only, no network)
 nix build .#redox-graphical   # Orbital desktop + audio
@@ -130,47 +132,86 @@ nix-shell -A native # Native shell
 
 ### RedoxOS Module System (nix/redox-system/)
 
-A NixOS-style module system for declarative RedoxOS configuration.
-Inspired by NixOS modules, disko (disk config), and Lassulus/wrappers (extend pattern).
+A declarative module system for RedoxOS configuration, built on
+[adios](https://github.com/adisbladis/adios) by
+[@adisbladis](https://github.com/adisbladis) with
+[Korora](https://github.com/adisbladis/adios) types.
+
+Unlike NixOS's `lib.evalModules`, adios modules declare **explicit inputs** by
+path — no global `config` namespace, no `lib.mkOption`/`lib.mkIf` machinery,
+no nixpkgs dependency in the evaluator. Each module is a self-contained unit
+that declares typed options (via Korora), names its dependencies, and provides
+an `impl` function that receives evaluated inputs.
+
+All option types use Korora's **compound type system**: `struct`, `enum`,
+`listOf`, `attrsOf`, `optionalAttr` — not just primitives. This means
+configuration errors are caught at evaluation time with precise error messages
+(e.g., `"'bogus' is not a member of enum 'StorageDriver'"`).
 
 ```nix
 # Usage in a Nix expression:
 let
-  redoxSystemFactory = import ./nix/redox-system { inherit lib; };
+  redoxSystemFactory = import ./nix/redox-system;
   mySystem = redoxSystemFactory.redoxSystem {
-    modules = [
-      ./nix/redox-system/modules/profiles/development.nix
-      {
-        redox.users.users.admin = { uid = 1001; gid = 1001; };
-        redox.networking.mode = "static";
-        redox.networking.interfaces.eth0 = {
-          address = "10.0.0.5"; gateway = "10.0.0.1";
-        };
-        redox.environment.systemPackages = [ pkgs.helix pkgs.ripgrep ];
-      }
-    ];
+    profiles = [ "development" ];
+    overrides = {
+      "/users" = {
+        users.admin = { uid = 1001; gid = 1001; home = "/home/admin";
+                        shell = "/bin/ion"; password = "redox"; };
+      };
+      "/networking" = {
+        mode = "static";       # enum: auto | dhcp | static | none
+        interfaces.eth0 = { address = "10.0.0.5"; gateway = "10.0.0.1"; };
+      };
+      "/environment" = {
+        systemPackages = [ pkgs.helix pkgs.ripgrep ];
+      };
+    };
     pkgs = flatRedoxPackages;  # All cross-compiled Redox packages
     hostPkgs = nixpkgs;        # Build machine packages
   };
-in mySystem.diskImage  # or .initfs, .toplevel, .config
+in mySystem.diskImage  # or .initfs, .toplevel
 ```
 
 **Module system structure:**
 - `nix/redox-system/default.nix` — `redoxSystem` entry point with `.extend` chaining
-- `nix/redox-system/eval.nix` — Module evaluator (lib.evalModules)
-- `nix/redox-system/modules/config/` — Option modules (boot, users, networking, etc.)
-- `nix/redox-system/modules/build/` — Build modules (initfs, disk-image, toplevel)
-- `nix/redox-system/modules/profiles/` — Pre-built configs (minimal, dev, graphical, cloud-hypervisor)
+- `nix/redox-system/modules/` — Adios modules (auto-imported via `adios.lib.importModules`)
+- `nix/redox-system/modules/build/` — Consolidated build module (rootTree, initfs, diskImage)
+- `nix/redox-system/profiles/` — Option presets (development, minimal, graphical, cloud-hypervisor)
+- `nix/redox-system/lib.nix` — Redox-specific helpers (passwd/group format, etc.)
+- `nix/vendor/adios/` — Vendored adios module system
+- `nix/vendor/korora/` — Vendored Korora type system
 
-**Key options:**
-- `redox.boot.{kernel, bootloader, initfs.*}` — Boot configuration
-- `redox.users.{users, groups}` — User/group management (Redox semicolon format)
-- `redox.networking.{enable, mode, dns, interfaces, remoteShell}` — Network config
-- `redox.hardware.{storage, network, graphics, audio}.drivers` — Driver selection
-- `redox.environment.{systemPackages, variables, shellAliases}` — System environment
-- `redox.services.{initScripts, startupScript}` — Init system config
-- `redox.graphics.enable` — Orbital desktop (auto-enables graphics drivers + USB)
-- `redox.generatedFiles` — All modules contribute config files here (disko pattern)
+**Module tree (10 modules with explicit inputs):**
+```
+/pkgs          — Package injection (pkgs, hostPkgs, nixpkgsLib)
+/boot          — Kernel, bootloader, initfs config         (inputs: /pkgs)
+/hardware      — Driver selection with enum types           (no inputs)
+/networking    — Network mode, DNS, interfaces              (no inputs)
+/environment   — Packages, shell aliases, variables         (no inputs)
+/filesystem    — Directory layout, symlinks                 (no inputs)
+/graphics      — Orbital desktop config                     (no inputs)
+/services      — Init scripts, startup                      (no inputs)
+/users         — User accounts with struct types, groups    (no inputs)
+/build         — Produces rootTree, initfs, diskImage       (inputs: all 9 above)
+```
+
+**Type system (Korora compound types):**
+- `struct "User" { uid = int; gid = int; home = string; ... }` — Typed records
+- `enum "StorageDriver" ["ahcid" "nvmed" "ided" "virtio-blkd"]` — Closed variants
+- `enum "NetworkMode" ["auto" "dhcp" "static" "none"]` — Mode selection
+- `listOf (enum "GraphicsDriver" ...)` — Parameterized containers
+- `attrsOf (struct "Interface" { address = string; gateway = string; })` — Typed maps
+- `optionalAttr bool` — Optional struct fields (absent is ok, wrong type is not)
+
+**Key options (by module path):**
+- `/boot` — `kernel`, `bootloader`, `initfsExtraBinaries`, `initfsExtraDrivers`, `initfsEnableGraphics`
+- `/users` — `users` (attrsOf User struct), `groups` (attrsOf Group struct)
+- `/networking` — `enable`, `mode` (enum), `dns` (listOf string), `interfaces` (attrsOf Interface struct)
+- `/hardware` — `storageDrivers` (listOf enum), `networkDrivers`, `graphicsDrivers`, `audioDrivers`
+- `/environment` — `systemPackages` (listOf derivation), `variables`, `shellAliases` (attrsOf string)
+- `/services` — `initScripts` (attrsOf InitScript struct), `startupScriptText`
+- `/graphics` — `enable`, `resolution`
 
 ### Running Tests
 
