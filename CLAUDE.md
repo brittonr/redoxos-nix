@@ -182,7 +182,7 @@ in mySystem.diskImage  # or .initfs, .toplevel
 - `nix/vendor/adios/` — Vendored adios module system
 - `nix/vendor/korora/` — Vendored Korora type system
 
-**Module tree (10 modules with explicit inputs):**
+**Module tree (15 modules with explicit inputs):**
 ```
 /pkgs          — Package injection (pkgs, hostPkgs, nixpkgsLib)
 /boot          — Kernel, bootloader, initfs config         (inputs: /pkgs)
@@ -193,13 +193,23 @@ in mySystem.diskImage  # or .initfs, .toplevel
 /graphics      — Orbital desktop config                     (no inputs)
 /services      — Init scripts, startup                      (no inputs)
 /users         — User accounts with struct types, groups    (no inputs)
-/build         — Produces rootTree, initfs, diskImage       (inputs: all 9 above)
+/security      — Namespace access, setuid, policies         (no inputs)
+/time          — Hostname, timezone, NTP, hwclock           (no inputs)
+/programs      — Ion, helix, editor, httpd config           (no inputs)
+/logging       — Log levels, destinations, retention        (no inputs)
+/power         — ACPI, power/idle actions, panic behavior   (no inputs)
+/build         — Produces rootTree, initfs, diskImage       (inputs: all 14 above)
 ```
 
 **Type system (Korora compound types):**
 - `struct "User" { uid = int; gid = int; home = string; ... }` — Typed records
 - `enum "StorageDriver" ["ahcid" "nvmed" "ided" "virtio-blkd"]` — Closed variants
 - `enum "NetworkMode" ["auto" "dhcp" "static" "none"]` — Mode selection
+- `enum "LogLevel" ["debug" "info" "warn" "error" "off"]` — Log levels
+- `enum "PowerAction" ["shutdown" "reboot" "suspend" "none"]` — Power actions
+- `enum "NamespaceAccess" ["full" "read-only" "none"]` — Scheme access control
+- `struct "IonConfig" { enable = bool; prompt = string; initExtra = string; }` — Shell config
+- `struct "HelixConfig" { enable = bool; theme = string; }` — Editor config
 - `listOf (enum "GraphicsDriver" ...)` — Parameterized containers
 - `attrsOf (struct "Interface" { address = string; gateway = string; })` — Typed maps
 - `optionalAttr bool` — Optional struct fields (absent is ok, wrong type is not)
@@ -212,6 +222,11 @@ in mySystem.diskImage  # or .initfs, .toplevel
 - `/environment` — `systemPackages` (listOf derivation), `variables`, `shellAliases` (attrsOf string)
 - `/services` — `initScripts` (attrsOf InitScript struct), `startupScriptText`
 - `/graphics` — `enable`, `resolution`
+- `/security` — `namespaceAccess` (attrsOf enum), `setuidPrograms`, `protectKernelSchemes`, `requirePasswords`, `allowRemoteRoot`
+- `/time` — `hostname`, `timezone`, `ntpEnable`, `ntpServers`, `hwclock` (enum)
+- `/programs` — `ion` (IonConfig struct), `helix` (HelixConfig struct), `editor`, `httpd` (HttpdConfig struct)
+- `/logging` — `level` (enum), `kernelLogLevel` (enum), `logToFile`, `logPath`, `maxLogSizeMB`, `persistAcrossBoot`
+- `/power` — `acpiEnable`, `powerAction` (enum), `idleAction` (enum), `idleTimeoutMinutes`, `rebootOnPanic`
 
 ### Running Tests
 
