@@ -106,6 +106,23 @@ nix run .#run-redox-qemu       # QEMU headless mode
 
 # Cloud Hypervisor networking setup (run once as root)
 sudo nix run .#setup-cloud-hypervisor-network  # Creates TAP interface with NAT
+
+# redox-rebuild: System configuration manager (like nixos-rebuild / darwin-rebuild)
+nix run .#redox-rebuild -- build                 # Build default profile toplevel
+nix run .#redox-rebuild -- build minimal         # Build minimal profile
+nix run .#redox-rebuild -- run                   # Build + launch VM
+nix run .#redox-rebuild -- run graphical         # Build + launch graphical VM
+nix run .#redox-rebuild -- test                  # Build + automated boot test
+nix run .#redox-rebuild -- diff                  # Show what changed vs current generation
+nix run .#redox-rebuild -- check                 # Run assertions + system checks only
+nix run .#redox-rebuild -- list-generations      # Show build history
+nix run .#redox-rebuild -- list-generations --json  # JSON output
+nix run .#redox-rebuild -- rollback              # Switch to previous generation
+nix run .#redox-rebuild -- rollback 1            # Switch to specific generation
+nix run .#redox-rebuild -- repl                  # Nix repl with system config
+nix run .#redox-rebuild -- version               # Show current system version info
+nix run .#redox-rebuild -- changelog             # Show recent module system git changes
+nix run .#redox-rebuild -- edit                  # Open flake.nix in $EDITOR
 ```
 
 ### Development Shells
