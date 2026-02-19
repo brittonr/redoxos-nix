@@ -215,7 +215,22 @@ in mySystem.diskImage  # or .initfs, .toplevel
 
 ### Running Tests
 
-Currently, tests are disabled in most packages due to cross-compilation. To run tests when available:
+```bash
+# Automated boot test — boots minimal image, verifies milestones on serial
+nix run .#boot-test              # Auto-detect (Cloud Hypervisor if KVM, else QEMU TCG)
+nix run .#boot-test -- --qemu    # Force QEMU TCG (no KVM required, slower)
+nix run .#boot-test -- --verbose # Show full serial output
+nix run .#boot-test -- --timeout 120  # Custom timeout
+
+# Module system tests (fast, no cross-compilation)
+nix build .#checks.x86_64-linux.eval-profile-default
+nix build .#checks.x86_64-linux.artifact-rootTree-has-passwd
+
+# All checks (includes cross-compiled builds — slow)
+nix flake check
+```
+
+Currently, Cargo tests are disabled in most packages due to cross-compilation. To run tests when available:
 ```bash
 cargo test --target x86_64-unknown-redox
 ```
