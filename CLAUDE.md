@@ -254,8 +254,15 @@ nix run .#boot-test -- --qemu    # Force QEMU TCG (no KVM required, slower)
 nix run .#boot-test -- --verbose # Show full serial output
 nix run .#boot-test -- --timeout 120  # Custom timeout
 
+# Functional test — boots test image, runs ~40 in-guest tests
+nix run .#functional-test              # Auto-detect VMM
+nix run .#functional-test -- --qemu    # Force QEMU TCG
+nix run .#functional-test -- --verbose # Show serial output
+nix run .#functional-test -- --timeout 180
+
 # Module system tests (fast, no cross-compilation)
 nix build .#checks.x86_64-linux.eval-profile-default
+nix build .#checks.x86_64-linux.eval-profile-functional-test
 nix build .#checks.x86_64-linux.artifact-rootTree-has-passwd
 
 # All checks (includes cross-compiled builds — slow)
