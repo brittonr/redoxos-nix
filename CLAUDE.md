@@ -123,6 +123,20 @@ nix run .#redox-rebuild -- repl                  # Nix repl with system config
 nix run .#redox-rebuild -- version               # Show current system version info
 nix run .#redox-rebuild -- changelog             # Show recent module system git changes
 nix run .#redox-rebuild -- edit                  # Open flake.nix in $EDITOR
+
+# Build bridge: live package push to running VM via virtio-fs
+nix run .#run-redox-shared                       # Boot VM with virtio-fs shared directory
+nix run .#push-to-redox -- ripgrep               # Build + push one package to shared cache
+nix run .#push-to-redox -- ripgrep fd bat        # Push multiple packages
+nix run .#push-to-redox -- --all                 # Push all available packages
+nix run .#push-to-redox -- --list                # List available + cached packages
+nix run .#build-bridge                           # Host-side daemon for in-guest rebuild requests
+
+# Guest side (inside Redox VM with shared filesystem):
+#   snix search --cache-path /scheme/shared/cache
+#   snix install ripgrep --cache-path /scheme/shared/cache
+#   # Or set env var once: export SNIX_CACHE_PATH=/scheme/shared/cache
+#   snix install ripgrep
 ```
 
 ### Development Shells
