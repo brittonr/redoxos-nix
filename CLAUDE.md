@@ -443,8 +443,13 @@ Cloud Hypervisor (--fs tag=shared)        ↕
   Redox kernel bug in `deallocate_p2frame` (page frame refcount corruption).
 - **Flat cache layout**: NARs in cache root (not `nar/` subdirectory). narinfo `URL:` field
   rewritten from `nar/hash.nar.zst` to `hash.nar.zst` during merge.
-- **Flag translation**: Redox flags (`O_RDONLY=0x10000`) translated to Linux FUSE flags
-  (`O_RDONLY=0`) via `redox_to_fuse_flags()`.
+- **Flag translation**: Redox flags (`O_RDONLY=0x10000`, `O_CREAT=0x02000000`) translated
+  to Linux FUSE flags (`O_RDONLY=0`, `O_CREAT=0o100`) via `redox_to_fuse_flags()`.
+- **Write support**: FUSE_WRITE (data in request descriptor), FUSE_CREATE (atomic
+  create+open), FUSE_MKDIR, FUSE_UNLINK, FUSE_RMDIR, FUSE_SETATTR (truncate).
+  Guest can create, write, overwrite, and delete files/dirs on the host.
+- **O_CREAT + O_DIRECTORY**: Redox `mkdir()` goes through `openat` with these flags,
+  handled specially to call FUSE_MKDIR then FUSE_OPENDIR.
 
 ## Ion Shell Reference
 
