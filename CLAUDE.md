@@ -268,11 +268,16 @@ nix run .#boot-test -- --qemu    # Force QEMU TCG (no KVM required, slower)
 nix run .#boot-test -- --verbose # Show full serial output
 nix run .#boot-test -- --timeout 120  # Custom timeout
 
-# Functional test — boots test image, runs ~40 in-guest tests
+# Functional test — boots test image, runs ~110 in-guest tests
 nix run .#functional-test              # Auto-detect VMM
 nix run .#functional-test -- --qemu    # Force QEMU TCG
 nix run .#functional-test -- --verbose # Show serial output
 nix run .#functional-test -- --timeout 180
+
+# Bridge test — tests live package delivery via virtio-fs (30 tests)
+nix run .#bridge-test              # Pushes packages, boots VM, tests snix install
+nix run .#bridge-test -- --verbose # Show full serial output
+nix run .#bridge-test -- --timeout 180
 
 # Module system tests (fast, no cross-compilation)
 nix build .#checks.x86_64-linux.eval-profile-default
@@ -399,6 +404,47 @@ qemu-system-x86_64 \
 - Legacy mode for compatibility
 - Uses serial console output
 - Exit with Ctrl+A then X
+
+## Build Bridge (virtio-fs live package delivery)
+
+The build bridge enables an edit→build→deploy→test loop without disk image rebuilds.
+Host-built packages are serialized to a binary cache and shared with a running Redox VM
+via virtio-fs, then installed on the guest using `snix`.
+
+### Architecture
+
+```
+Host                                    Guest (Redox VM)
+─────────────────────                   ─────────────────────
+nix build .#ripgrep                     /scheme/shared/cache/
+  → NAR serialize + zstd compress         ├── packages.json
+  → write to /tmp/redox-shared/cache/     ├── *.narinfo
+                                          └── *.nar.zst
+virtiofsd --shared-dir /tmp/redox-shared  │
+  ↕ virtio-fs (FUSE over virtqueue)       │
+Cloud Hypervisor (--fs tag=shared)        ↕
+                                        virtio-fsd driver
+                                          → /scheme/shared/
+                                        snix install ripgrep
+                                          → reads cache, unpacks NAR
+```
+
+### Key files
+- `nix/pkgs/infrastructure/push-to-redox.nix` — Host tool: `nix build` → NAR → shared cache
+- `nix/pkgs/infrastructure/bridge-test.nix` — End-to-end test orchestrator (30 tests)
+- `nix/pkgs/system/virtio-fsd/src/` — Guest FUSE-over-virtqueue driver
+- `nix/redox-system/profiles/bridge-test.nix` — Guest test script (Ion shell)
+- `nix/lib/build-binary-cache.py` — Python NAR serializer
+
+### virtio-fsd implementation notes
+- **Response buffer sizing**: virtiofsd uses the response descriptor size to determine
+  `preadv2()` length. Response buffers MUST be `sizeof(FuseOutHeader) + requested_size`.
+- **DMA buffer leak**: Buffers are `core::mem::forget()`ed after each request to avoid a
+  Redox kernel bug in `deallocate_p2frame` (page frame refcount corruption).
+- **Flat cache layout**: NARs in cache root (not `nar/` subdirectory). narinfo `URL:` field
+  rewritten from `nar/hash.nar.zst` to `hash.nar.zst` during merge.
+- **Flag translation**: Redox flags (`O_RDONLY=0x10000`) translated to Linux FUSE flags
+  (`O_RDONLY=0`) via `redox_to_fuse_flags()`.
 
 ## Ion Shell Reference
 
