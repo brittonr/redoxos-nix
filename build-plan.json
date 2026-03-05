@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "workspaceRoot": "/home/brittonr/git/redox",
+  "roots": [
+    "path+file:///home/brittonr/git/redox#0.1.0"
+  ],
+  "workspaceMembers": {
+    "redox": "path+file:///home/brittonr/git/redox#0.1.0"
+  },
+  "cargoLockHash": "e12d3244d51e34da84ade476d547eebaaa264cffd4a087dcdf8d6c13897fda6d",
+  "crates": {
+    "path+file:///home/brittonr/git/redox#0.1.0": {
+      "crateName": "redox",
+      "version": "0.1.0",
+      "edition": "2024",
+      "sha256": null,
+      "source": {
+        "type": "local",
+        "path": "."
+      },
+      "features": [],
+      "dependencies": [],
+      "buildDependencies": [],
+      "procMacro": false,
+      "build": null,
+      "libPath": null,
+      "libName": null,
+      "libCrateTypes": [],
+      "crateBin": [
+        {
+          "name": "redox",
+          "path": "src/main.rs"
+        }
+      ],
+      "links": null
+    }
+  }
+}
