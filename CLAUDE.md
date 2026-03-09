@@ -278,6 +278,55 @@ snix includes three Redox-native scheme daemons that leverage the OS's namespace
 
 **Profile**: `scheme-native` profile enables all three capabilities on top of the development profile.
 
+### Interactive VM Testing (pi tools)
+
+Use the `vm_boot`, `vm_screenshot`, `vm_serial`, and `vm_stop` tools for
+interactive VM testing during development. These are faster than the nix
+test runners for iterative work because they don't rebuild — just boot
+an existing disk image.
+
+```
+# Build images (only when source changes)
+nix build .#redox-graphical -o result-graphical
+nix build .#redox-default -o result-default
+nix build .#bootloader -o result-bootloader
+
+# Boot a graphical image and verify Orbital renders
+vm_boot(image: "result-graphical/redox.img",
+        kernel: "result-bootloader/boot/EFI/BOOT/BOOTX64.EFI")
+vm_serial(send: "\\r", expect: "Boot Complete", timeout: 60)
+vm_screenshot(delay: 5)   # → inline image of Orbital desktop
+vm_stop()
+
+# Boot a headless image and run commands
+vm_boot(image: "result-default/redox.img",
+        kernel: "result-bootloader/boot/EFI/BOOT/BOOTX64.EFI")
+vm_serial(send: "\\r", expect: "Boot Complete", timeout: 60)
+vm_serial(expect: "[#$] ")                  # wait for shell prompt
+vm_serial(command: "uname -a")              # run a command
+vm_serial(command: "ls /bin")               # list binaries
+vm_stop()
+```
+
+**When to use which:**
+- `vm_boot` + `vm_screenshot`: Verify graphical changes (Orbital, themes, fonts)
+- `vm_boot` + `vm_serial`: Verify boot, init scripts, serial output, error messages
+- `nix run .#boot-test`: CI-style pass/fail on boot milestones (runs in sandbox)
+- `nix run .#functional-test`: Comprehensive in-guest test suite (~110 tests)
+
+**Serial limitations:**
+- Serial input (commands) works in headless/default profiles
+- Serial input does NOT work in graphical profile (debug: scheme lacks tcsetattr)
+- Serial READ (boot logs, expect patterns) works in all profiles
+- For graphical profile, use `vm_screenshot` to verify visual output
+
+**Boot sequence patterns for vm_serial expect:**
+- `"Arrow keys"` — resolution picker (send `\r` to auto-select)
+- `"Boot Complete"` — rootfs mounted, init scripts done
+- `"[#$] "` — shell prompt ready (headless only)
+- `"GraphicScreen"` — Orbital allocated display buffer
+- `"ImageAligned"` — Orbital loaded an image (wallpaper/icon)
+
 ### Running Tests
 
 ```bash
