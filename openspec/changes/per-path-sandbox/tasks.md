@@ -2,8 +2,8 @@
 
 - [x] 1.1 Write a minimal test program (Rust, cross-compiled for Redox) that calls `mkns` without `file`, then `register_scheme_to_ns(child_ns_fd, "file", cap_fd)` — confirm the kernel accepts registering a userspace scheme named `file` in a child namespace
 - [x] 1.2 Extend the test to fork a child, `setns` to the child namespace, and verify the child's `open("file:/tmp/test")` arrives at the proxy (not redoxfs)
-- [ ] 1.3 Verify that `exec()` in the child resolves the builder binary path through the proxy's `file:` scheme — confirm the proxy must handle the exec-time open
-- [ ] 1.4 Measure round-trip latency: time a single `open` + `read` + `close` through the proxy vs direct `file:` access — establish baseline overhead
+- [x] 1.3 Verify that `exec()` in the child resolves the builder binary path through the proxy's `file:` scheme — confirm the proxy must handle the exec-time open
+- [x] 1.4 Measure round-trip latency: time a single `open` + `read` + `close` through the proxy vs direct `file:` access — establish baseline overhead
 
 ## 2. Allow-List and Path Matching
 
@@ -64,9 +64,9 @@
 
 ## 9. VM Integration Tests
 
-- [ ] 9.1 Add a functional test: build a derivation that tries to read `/etc/passwd` — verify it fails with the proxy active
-- [ ] 9.2 Add a functional test: build a derivation that reads a declared input store path — verify it succeeds
-- [ ] 9.3 Add a functional test: build a derivation that tries to read an undeclared store path — verify it fails
-- [ ] 9.4 Add a functional test: build a derivation that writes to `$out` and reads it back — verify success
-- [ ] 9.5 Verify existing self-hosting tests still pass (cargo builds, proc-macros, snix self-compile) with the proxy active
-- [ ] 9.6 Add a fallback test: build with `--no-sandbox` and verify it still works
+- [x] 9.1 Add a functional test: build a derivation that tries to read `/etc/passwd` — verify it fails with the proxy active
+- [x] 9.2 Add a functional test: build a derivation that reads a declared input store path — verify it succeeds
+- [x] 9.3 Add a functional test: build a derivation that tries to read an undeclared store path — verify it fails
+- [x] 9.4 Add a functional test: build a derivation that writes to `$out` and reads it back — verify success
+- [x] 9.5 Verify existing self-hosting tests still pass (cargo builds, proc-macros, snix self-compile) with the proxy active
+- [x] 9.6 Add a fallback test: build with `--no-sandbox` and verify it still works
