@@ -15,8 +15,8 @@
 
 - [x] 4.1 Build a disk image with the updated cc wrapper and lld-wrapper included.
 - [x] 4.2 Boot the image and run a JOBS=1 self-hosting build to confirm no regression.
-- [ ] 4.3 Run JOBS=2 self-hosting build of `fn main() { println!("hello"); }` — confirm both linker invocations succeed without `abort()` crash. (Requires parallel-build-test profile run)
-- [ ] 4.4 Run JOBS=2 cargo build of a multi-crate project (e.g., ripgrep) to validate under real parallel workload. (Requires parallel-build-test profile run)
+- [x] 4.3 Run JOBS=2 self-hosting build of `fn main() { println!("hello"); }` — confirmed PASS in 3s via parallel-build-test profile.
+- [ ] 4.4 Run JOBS=2 cargo build of a multi-crate project (e.g., ripgrep) to validate under real parallel workload.
 
 ## 5. Cleanup
 
