@@ -231,3 +231,5 @@
 {"text":"what next","timestamp":1773221490412}
 {"text":"Fix remaining OS bugs - write an openspec","timestamp":1773221776143}
 {"text":"Fix remaining OS bugs - write an openspec","timestamp":1773223004287}
+{"text":"what next","timestamp":1773227079303}
+{"text":"1. --env-set removal validation (tasks 2.7–2.9) — Rebuild cargo without the env-set patch, test proc-macro crates (thiserror-impl,\n serde_derive). Would simplify the toolchain if it works.","timestamp":1773227198912}

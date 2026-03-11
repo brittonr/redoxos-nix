@@ -15,9 +15,9 @@
 - [x] 2.4 No new wiring needed — environ injection is part of upstream relibc, not our patches.
 - [x] 2.5 Added env-propagation and env-new-var-propagation tests to functional-test.nix. Uses bash export + child bash to verify env vars propagate through exec.
 - [x] 2.6 Built and ran VM — env-propagation and env-new-var-propagation both PASS. Environ propagates through exec correctly on current relibc.
-- [ ] 2.7 Test with `--env-set` removed: requires rebuilding cargo without patch-cargo-env-set.py and running self-hosting-test. Deferred — environ injection exists upstream but proc-macro dlopen path needs validation with a full rebuild.
-- [ ] 2.8 If 2.7 passes, remove `patch-cargo-env-set.py` from the cargo build and run the full self-hosting test to validate (deferred with 2.7)
-- [ ] 2.9 If 2.7 fails, keep --env-set and document what still doesn't work in napkin.md (deferred with 2.7)
+- [x] 2.7 Test with `--env-set` removed: Built cargo without patch-cargo-env-set.py and ran full self-hosting test (42 pass, 8 fail). Result: FAIL. The `buildrs` test shows `option_env!("BUILD_TARGET")` returns None (cfg=yes,env=missing,runtime=None) — confirms Command::env() vars don't reach rustc's logical_env for env!() macro expansion. Both compile-time (env!/option_env!) and runtime (std::env::var) env propagation fail for cargo:rustc-env values. DSO environ isolation is the root cause. Note: 5 of the 8 test failures are pre-existing heredoc issues in the test script (Nix '' string stripping breaks bash heredoc terminators), not env-set related.
+- [x] 2.8 N/A — 2.7 failed. --env-set patch kept with validation comment in rustc-redox.nix documenting the 2026-03-11 test results.
+- [x] 2.9 --env-set kept. Updated rustc-redox.nix with validation date and specific failure evidence. Updated napkin.md with detailed findings.
 
 ## 3. Diagnose parallel cargo hang
 

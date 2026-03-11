@@ -185,7 +185,7 @@ exec clang -static $SYSROOT/lib/crt0.o $SYSROOT/lib/crti.o "$@" \
 ### Key Patches (all still required)
 **relibc** (10 patches): abort-dso, chdir-cwd, execvpe, fcntl-lock, ld-so-align,
 ld-so-argv-utf8, ld-so-cwd, ld-so-dso-init, pipe-cloexec, randd-read
-**cargo** (4 patches): env-set (may be removable — environ injection exists upstream, needs proc-macro validation), read2-pipes, redox-paths, blake3-redox (in vendor)
+**cargo** (4 patches): env-set (validated 2026-03-11: still required — option_env! returns None without it), read2-pipes, redox-paths, blake3-redox (in vendor)
 **rustc** (4 patches): execvpe, read2-pipes, rustc-flags, allocator-shim
 
 ### Allocator Shim

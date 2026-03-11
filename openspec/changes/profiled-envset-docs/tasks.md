@@ -7,8 +7,8 @@
 
 ## 2. Investigate --env-set workaround
 
-- [ ] 2.1 Add a minimal `env!("CARGO_PKG_NAME")` test crate to the self-hosting test suite that runs both with and without `--env-set` — SKIPPED: existing Mar 9 data sufficient (49/58 without, 53/57 with)
-- [ ] 2.2 Build the self-hosting test image WITHOUT `patch-cargo-env-set.py` and run it — SKIPPED: already tested Mar 9 (9 failures documented)
+- [x] 2.1 Validated 2026-03-11 via fix-remaining-os-bugs task 2.7: built cargo without patch-cargo-env-set.py, ran full self-hosting test. buildrs test shows option_env!("BUILD_TARGET") returns None (env=missing). Confirms env propagation still broken without --env-set.
+- [x] 2.2 Done via fix-remaining-os-bugs task 2.7: 42 pass, 8 fail (5 pre-existing heredoc issues, 1 parallel-jobs, 2 heredoc-related). --env-set patch confirmed still necessary.
 - [x] 2.3 Document findings: which specific env vars fail, in which crate context (proc-macro vs binary), and root cause hypothesis
 - [x] 2.4 Based on findings, either remove the workaround (if all tests pass) or add permanent documentation comment in rustc-redox.nix — KEPT with expanded permanent rationale
 
