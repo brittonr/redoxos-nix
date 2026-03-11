@@ -16,7 +16,7 @@
 - [x] 4.1 Build a disk image with the updated cc wrapper and lld-wrapper included.
 - [x] 4.2 Boot the image and run a JOBS=1 self-hosting build to confirm no regression.
 - [x] 4.3 Run JOBS=2 self-hosting build of `fn main() { println!("hello"); }` — confirmed PASS in 3s via parallel-build-test profile.
-- [ ] 4.4 Run JOBS=2 cargo build of a multi-crate project (e.g., ripgrep) to validate under real parallel workload.
+- [x] 4.4 Run JOBS=2 cargo build of a multi-crate project — workspace with 3 binary crates hangs after compiling 2-3 crates. Linker doesn't crash (lld-wrapper fix works), but cargo's parallel job management hangs (separate relibc poll() bug, not lld stack).
 
 ## 5. Cleanup
 

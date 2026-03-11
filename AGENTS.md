@@ -178,7 +178,7 @@ exec clang -static $SYSROOT/lib/crt0.o $SYSROOT/lib/crti.o "$@" \
 - `snix build .#ripgrep` (flake installables, 33 crates compiled)
 
 ### What Doesn't
-- `CARGO_BUILD_JOBS > 1` crashes with lld stack overflow — `lld-wrapper` provides 16MB stack via thread spawn + exec pattern (same as rustc). JOBS=2 validation pending.
+- `CARGO_BUILD_JOBS > 1` has two issues: (1) lld stack overflow — fixed by `lld-wrapper` (16MB stack thread + exec, same as rustc); (2) cargo job manager hangs on multi-crate workspace builds — likely relibc `poll()` bug, JOBS=1 still required for multi-crate projects
 - `cargo` intermittently hangs on flock — cargo-build-safe wrapper with 90s timeout needed
 - `env!("CARGO_PKG_*")` in proc-macro crates needs `--env-set` workaround (permanent)
 
