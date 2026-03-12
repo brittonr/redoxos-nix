@@ -178,15 +178,24 @@ exec clang -static $SYSROOT/lib/crt0.o $SYSROOT/lib/crti.o "$@" \
 - `snix build .#ripgrep` (flake installables, 33 crates compiled)
 
 ### What Doesn't
-- `CARGO_BUILD_JOBS > 1` has two issues: (1) lld stack overflow — fixed by `lld-wrapper` (16MB stack thread + exec, same as rustc); (2) cargo job manager hangs on multi-crate workspace builds — likely relibc `poll()` bug, JOBS=1 still required for multi-crate projects
+- `CARGO_BUILD_JOBS > 1` had two issues: (1) lld stack overflow — fixed by `lld-wrapper` (16MB stack thread + exec); (2) cargo job manager hangs on multi-crate workspace builds — fixed by `patch-relibc-fork-lock.py` (see below)
 - `cargo` intermittently hangs on flock — cargo-build-safe wrapper with 90s timeout needed
 - `env!("CARGO_PKG_*")` in proc-macro crates needs `--env-set` workaround (permanent)
 
 ### Key Patches (all still required)
-**relibc** (10 patches): abort-dso, chdir-cwd, execvpe, fcntl-lock, ld-so-align,
-ld-so-argv-utf8, ld-so-cwd, ld-so-dso-init, pipe-cloexec, randd-read
+**relibc** (11 patches): abort-dso, chdir-cwd, execvpe, fcntl-lock, fork-lock,
+ld-so-align, ld-so-argv-utf8, ld-so-cwd, ld-so-dso-init, pipe-cloexec, randd-read
 **cargo** (4 patches): env-set (validated 2026-03-11: still required — option_env! returns None without it), read2-pipes, redox-paths, blake3-redox (in vendor)
 **rustc** (4 patches): execvpe, read2-pipes, rustc-flags, allocator-shim
+
+### Fork Thread Safety (CLONE_LOCK)
+- CLONE_LOCK (RwLock) serializes fork (write) and thread creation (read)
+- Futex-based RwLock has a lost-wake bug: CoW address space duplication during fork copies futex_wait kernel state, futex_wake targets wrong physical page
+- Fix: `patch-relibc-fork-lock.py` replaces CLONE_LOCK with AtomicI32 + sched_yield() (no futex)
+- State: 0=unlocked, >0=reader count, -1=exclusive (fork)
+- `enable_alloc_after_fork()` (allocator pthread_atfork hooks) is NEVER called — no allocator lock during fork
+- `fork_impl()` is thread-safe when called concurrently without any locking
+- Any futex-based primitive can hit the same CoW bug in multi-threaded fork scenarios
 
 ### Allocator Shim
 - 7 symbols with v0 mangling + `__rustc` crate hash (deterministic per rustc version)
