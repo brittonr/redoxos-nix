@@ -262,3 +262,9 @@
 {"text":"lets continue","timestamp":1773324359983}
 {"text":"lets continue working on it","timestamp":1773325212054}
 {"text":"yes keep going","timestamp":1773326666536}
+{"text":"- bat: sys-info crate's build.rs panics on target_os = \"redox\"\n - fd: faccess crate uses faccessat (not in relibc) — needs source patch via extraCrateOverrides\n - lsd: rustix crate tries to use linux_raw_sys — needs feature override to use libc backend\n\n These need extraCrateOverrides with crate-level source patches or feature changes, which is straightforward but per-package work.","timestamp":1773329700417}
+{"text":"what next","timestamp":1773332291270}
+{"text":"2","timestamp":1773332494408}
+{"text":"lets fix  ### Discovered: strace-redox pre-existing build failure\n\n Auto-vendor doesn't handle strace-redox's git libc dependency. Blocks default image but not minimal/functional-test. Pre-existing\n (same failure on main before this change).","timestamp":1773333427890}
+{"text":"what next","timestamp":1773333842297}
+{"text":"lets do 1","timestamp":1773333890041}
