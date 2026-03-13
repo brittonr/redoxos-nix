@@ -276,3 +276,5 @@
 {"text":"continue","timestamp":1773412481355}
 {"text":"what next","timestamp":1773416127253}
 {"text":"1, then write an openspec for 2","timestamp":1773416252649}
+{"text":"lets move all our patches to .patch files that we apply using nix","timestamp":1773419380866}
+{"text":"commit and confirm it works","timestamp":1773420201666}
